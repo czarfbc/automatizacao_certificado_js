@@ -24,7 +24,7 @@ const jsonData = XLSX.utils.sheet_to_json(worksheet);
       await page.setContent(content);
 
       const pdfPath = `./certificados/${element.clientes}.pdf`;
-      await page.pdf({ path: pdfPath, format: 'A4' });
+      await page.pdf({ path: pdfPath, width: '800px', height: '800' });
 
       console.log(`PDF gerado para o cliente ${element.clientes}: ${pdfPath}`);
     } catch (error) {
