@@ -26,8 +26,9 @@ const jsonData = XLSX.utils.sheet_to_json(worksheet);
       const pdfPath = `./certificados/${element.clientes}.pdf`;
       await page.pdf({
         path: pdfPath,
-        format: 'A4',
         printBackground: true,
+        format: 'A4',
+        landscape: true,
         pageRanges: '1-2',
       });
 

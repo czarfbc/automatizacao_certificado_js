@@ -10,10 +10,19 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        font-family: 'Inter', sans-serif;
+      }
+      html,
+      body {
+        height: 100%;
+        padding: 5px;
       }
       .wrapper {
-        background-color: aquamarine;
         border: 3px solid black;
+        height: 100%;
+      }
+      .wrapper1 {
+        margin-top: 10px;
       }
       @media print {
         .wrapper {
@@ -24,9 +33,6 @@
           page-break-before: always;
         }
       }
-      p {
-        font-family: 'Inter', sans-serif;
-      }
     </style>
   </head>
   <body>
@@ -36,7 +42,7 @@
       <p>CPF: {{cpf}}</p>
     </div>
     <div class="page-break"></div>
-    <div class="wrapper">
+    <div class="wrapper wrapper1">
       <p>teste</p>
     </div>
   </body>
