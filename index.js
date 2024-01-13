@@ -7,7 +7,7 @@ const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
 (async () => {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch();
 
   for (const element of jsonData) {
     const page = await browser.newPage();
@@ -24,7 +24,12 @@ const jsonData = XLSX.utils.sheet_to_json(worksheet);
       await page.setContent(content);
 
       const pdfPath = `./certificados/${element.clientes}.pdf`;
-      await page.pdf({ path: pdfPath, width: '800px', height: '800' });
+      await page.pdf({
+        path: pdfPath,
+        format: 'A4',
+        printBackground: true,
+        pageRanges: '1-2',
+      });
 
       console.log(`PDF gerado para o cliente ${element.clientes}: ${pdfPath}`);
     } catch (error) {

@@ -6,17 +6,38 @@
     <title>Document</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .wrapper {
+        background-color: aquamarine;
+        border: 3px solid black;
+      }
+      @media print {
+        .wrapper {
+          page-break-after: always;
+        }
+
+        .page-break {
+          page-break-before: always;
+        }
+      }
       p {
         font-family: 'Inter', sans-serif;
-        color: aquamarine;
       }
     </style>
   </head>
   <body>
-    <div class="item">
+    <div class="wrapper">
       <p>Cliente: {{clientes}}</p>
       <p>Valor: {{valor}}</p>
       <p>CPF: {{cpf}}</p>
+    </div>
+    <div class="page-break"></div>
+    <div class="wrapper">
+      <p>teste</p>
     </div>
   </body>
 </html>
