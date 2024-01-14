@@ -2,11 +2,15 @@ import XLSX from 'xlsx';
 import puppeteer from 'puppeteer';
 import fs from 'fs/promises';
 
-const workbook = XLSX.readFile('Planilha sem título.xlsx');
+const workbook = XLSX.readFile('./planilha/Pasta.xlsx');
 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
 console.log(jsonData);
+
+function removerAcentos(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 
 (async () => {
   const browser = await puppeteer.launch();
@@ -18,11 +22,15 @@ console.log(jsonData);
       const htmlPath = 'index.html';
       const htmlContent = await fs.readFile(htmlPath, 'utf-8');
 
+      const nomeSemAcento = removerAcentos(element.Colaborador);
+
       const content = htmlContent
-        .replace('{{Colaborador}}', element.Colaborador)
-        .replace('{{CPF}}', element.RG)
+        .replace('{{ColaboradorTitle}}', nomeSemAcento)
+        .replace('{{CPF}}', element.CPF)
         .replace('{{TopicoAssunto}}', element.TopicoAssunto)
-        .replace('{{Duracao}}', element.Duracao);
+        .replace('{{Duracao}}', element.Duracao)
+        .replace('{{Data}}', element.Data)
+        .replace('{{ColaboradorAss}}', element.Colaborador);
 
       await page.setContent(content);
 
