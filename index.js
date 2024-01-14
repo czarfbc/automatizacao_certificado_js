@@ -6,6 +6,8 @@ const workbook = XLSX.readFile('Planilha sem título.xlsx');
 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
+console.log(jsonData);
+
 (async () => {
   const browser = await puppeteer.launch();
 
@@ -17,25 +19,28 @@ const jsonData = XLSX.utils.sheet_to_json(worksheet);
       const htmlContent = await fs.readFile(htmlPath, 'utf-8');
 
       const content = htmlContent
-        .replace('{{clientes}}', element.clientes)
-        .replace('{{valor}}', element.valor)
-        .replace('{{cpf}}', element.cpf);
+        .replace('{{Colaborador}}', element.Colaborador)
+        .replace('{{CPF}}', element.RG)
+        .replace('{{TopicoAssunto}}', element.TopicoAssunto)
+        .replace('{{Duracao}}', element.Duracao);
 
       await page.setContent(content);
 
-      const pdfPath = `./certificados/${element.clientes}.pdf`;
+      const pdfPath = `./certificados/${element.Colaborador}.pdf`;
       await page.pdf({
         path: pdfPath,
         printBackground: true,
-        format: 'A4',
-        landscape: true,
+        width: '960px',
+        height: '718px',
         pageRanges: '1-2',
       });
 
-      console.log(`PDF gerado para o cliente ${element.clientes}: ${pdfPath}`);
+      console.log(
+        `PDF gerado para o cliente ${element.Colaborador}: ${pdfPath}`
+      );
     } catch (error) {
       console.error(
-        `Erro ao processar o cliente ${element.clientes}: ${error.message}`
+        `Erro ao processar o cliente ${element.Colaborador}: ${error.message}`
       );
     } finally {
       await page.close();
