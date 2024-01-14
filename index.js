@@ -38,8 +38,10 @@ function removerAcentos(str) {
       await page.pdf({
         path: pdfPath,
         printBackground: true,
-        width: '960px',
-        height: '718px',
+        // width: '960px',
+        // height: '718px',
+        format: 'A4',
+        landscape: true,
         pageRanges: '1-2',
       });
 
