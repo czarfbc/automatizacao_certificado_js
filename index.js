@@ -86,7 +86,10 @@ function removerAcentos(str) {
 
       await page.setContent(content);
 
-      const pdfPath = `./certificados/${element.Colaborador}.pdf`;
+      const namePDF = element.Colaborador.split(' ').join('_');
+      const cpfPDF = element.CPF.split(/[.-]/).join('');
+
+      const pdfPath = `./certificados/${namePDF}_${cpfPDF}.pdf`;
       await page.pdf({
         path: pdfPath,
         printBackground: true,
