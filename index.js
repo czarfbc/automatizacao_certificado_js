@@ -25,69 +25,17 @@ function removerAcentos(str) {
       const nomeSemAcento = removerAcentos(element.Colaborador);
       const nomeMaiusculo = nomeSemAcento.toUpperCase();
 
-      const dataExcel = new Date(
-        (element.Data - 1) * 24 * 3600 * 1000 + new Date('1900-01-01').getTime()
-      );
-
-      const dia = dataExcel.getDate().toString().padStart(2, '0');
-      let mes = (dataExcel.getMonth() + 1).toString().padStart(2, '0');
-      const ano = dataExcel.getFullYear();
-
-      switch (mes) {
-        case '01':
-          mes = 'Janeiro';
-          break;
-        case '02':
-          mes = 'Fevereiro';
-          break;
-        case '03':
-          mes = 'Março';
-          break;
-        case '04':
-          mes = 'Abril';
-          break;
-        case '05':
-          mes = 'Maio';
-          break;
-        case '06':
-          mes = 'Junho';
-          break;
-        case '07':
-          mes = 'Julho';
-          break;
-        case '08':
-          mes = 'Agosto';
-          break;
-        case '09':
-          mes = 'Setembro';
-          break;
-        case '10':
-          mes = 'Outubro';
-          break;
-        case '11':
-          mes = 'Novembro';
-          break;
-        case '12':
-          mes = 'Dezembro';
-          break;
-        default:
-          break;
-      }
-
-      const dataFormatada = `${dia} de ${mes} de ${ano}`;
-
       const content = htmlContent
         .replace('{{ColaboradorTitle}}', nomeMaiusculo)
         .replace('{{CPF}}', element.CPF)
         .replace('{{TopicoAssunto}}', element.TopicoAssunto)
         .replace('{{Duracao}}', element.Duracao)
-        .replace('{{Data}}', dataFormatada)
         .replace('{{ColaboradorAss}}', element.Colaborador);
 
       await page.setContent(content);
 
       const namePDF = element.Colaborador.split(' ').join('_');
-      const cpfPDF = element.CPF.split(/[.-]/).join('');
+      const cpfPDF = element.CPF.split(/[./-]/).join('');
 
       const pdfPath = `./certificados/${namePDF}_${cpfPDF}.pdf`;
       await page.pdf({
@@ -95,8 +43,6 @@ function removerAcentos(str) {
         printBackground: true,
         width: '960px',
         height: '720px',
-        // format: 'A4',
-        // landscape: true,
         pageRanges: '1-2',
       });
 
