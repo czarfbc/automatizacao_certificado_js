@@ -1,16 +1,53 @@
-import XLSX from 'xlsx';
+//import XLSX from 'xlsx';
 import puppeteer from 'puppeteer';
 import fs from 'fs/promises';
+import mammoth from 'mammoth';
 
-const workbook = XLSX.readFile('./planilha/Pasta.xlsx');
-const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-const jsonData = XLSX.utils.sheet_to_json(worksheet);
+// const workbook = XLSX.readFile('./planilha/Pasta.xlsx');
+// const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+// const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-console.log(jsonData);
+// console.log(jsonData);
+
+let docxPath = './planilha/dd.docx';
+let jsonData = [];
+
+mammoth
+  .extractRawText({ path: docxPath })
+  .then(function (result) {
+    let text = result.value;
+    let lines = text.split('\n');
+
+    for (let line of lines) {
+      let trimmedLine = line.trim();
+
+      // Verificar se a linha parece ser um nome de colaborador
+      if (/^[^\d]+$/g.test(trimmedLine)) {
+        jsonData.push({ Colaborador: trimmedLine });
+      }
+
+      // Verificar se a linha parece ser um CPF
+      if (
+        /^\d{3}\.\d{3}\.\d{3}-\d{2}$/g.test(trimmedLine) ||
+        /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/g.test(trimmedLine)
+      ) {
+        if (jsonData.length > 0) {
+          jsonData[jsonData.length - 1]['CPF'] = trimmedLine;
+        }
+      }
+    }
+
+    console.log(jsonData);
+  })
+  .catch(function (err) {
+    console.log(err);
+  });
 
 function removerAcentos(str) {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
+
+let numbersPDF = 0;
 
 (async () => {
   const browser = await puppeteer.launch();
@@ -23,71 +60,17 @@ function removerAcentos(str) {
       const htmlContent = await fs.readFile(htmlPath, 'utf-8');
 
       const nomeSemAcento = removerAcentos(element.Colaborador);
-      const nomeMaiusculo = nomeSemAcento.toUpperCase();
-
-      const dataExcel = new Date(
-        (element.Data - 1) * 24 * 3600 * 1000 + new Date('1900-01-01').getTime()
-      );
-
-      const dia = dataExcel.getDate().toString().padStart(2, '0');
-      let mes = (dataExcel.getMonth() + 1).toString().padStart(2, '0');
-      const ano = dataExcel.getFullYear();
-
-      switch (mes) {
-        case '01':
-          mes = 'Janeiro';
-          break;
-        case '02':
-          mes = 'Fevereiro';
-          break;
-        case '03':
-          mes = 'Março';
-          break;
-        case '04':
-          mes = 'Abril';
-          break;
-        case '05':
-          mes = 'Maio';
-          break;
-        case '06':
-          mes = 'Junho';
-          break;
-        case '07':
-          mes = 'Julho';
-          break;
-        case '08':
-          mes = 'Agosto';
-          break;
-        case '09':
-          mes = 'Setembro';
-          break;
-        case '10':
-          mes = 'Outubro';
-          break;
-        case '11':
-          mes = 'Novembro';
-          break;
-        case '12':
-          mes = 'Dezembro';
-          break;
-        default:
-          break;
-      }
-
-      const dataFormatada = `${dia} de ${mes} de ${ano}`;
+      const nomeMaiusculoSemAcento = nomeSemAcento.toUpperCase();
 
       const content = htmlContent
-        .replace('{{ColaboradorTitle}}', nomeMaiusculo)
+        .replace('{{ColaboradorTitle}}', nomeMaiusculoSemAcento)
         .replace('{{CPF}}', element.CPF)
-        .replace('{{TopicoAssunto}}', element.TopicoAssunto)
-        .replace('{{Duracao}}', element.Duracao)
-        .replace('{{Data}}', dataFormatada)
         .replace('{{ColaboradorAss}}', element.Colaborador);
 
       await page.setContent(content);
 
       const namePDF = element.Colaborador.split(' ').join('_');
-      const cpfPDF = element.CPF.split(/[.-]/).join('');
+      const cpfPDF = element.CPF.split(/[./-]/).join('');
 
       const pdfPath = `./certificados/${namePDF}_${cpfPDF}.pdf`;
       await page.pdf({
@@ -95,16 +78,18 @@ function removerAcentos(str) {
         printBackground: true,
         width: '960px',
         height: '720px',
-        // format: 'A4',
-        // landscape: true,
         pageRanges: '1-2',
       });
 
       console.log(
+        '\x1b[38;2;0;255;0m%s\x1b[0m',
         `PDF gerado para o cliente ${element.Colaborador}: ${pdfPath}`
       );
+
+      numbersPDF++;
     } catch (error) {
       console.error(
+        '\x1b[38;2;255;0;0m%s\x1b[0m',
         `Erro ao processar o cliente ${element.Colaborador}: ${error.message}`
       );
     } finally {
@@ -113,5 +98,8 @@ function removerAcentos(str) {
   }
 
   await browser.close();
-  console.log('PDFs gerados com sucesso!');
+  console.log(
+    '\x1b[38;2;0;255;255m%s\x1b[0m',
+    `${numbersPDF} PDFs gerados com sucesso! `
+  );
 })();
